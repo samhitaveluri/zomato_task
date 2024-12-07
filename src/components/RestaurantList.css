@@ -1,0 +1,95 @@
+ 
+
+.search-container {
+  margin-bottom: 20px;
+}
+
+.search-container input {
+  padding: 10px;
+  margin: 5px;
+  width: 150px;
+}
+
+.search-container button {
+  padding: 10px;
+  cursor: pointer;
+}
+
+.restaurant-list-container {
+  padding: 20px;
+  text-align: center;
+}
+
+/* Restaurant list grid layout */
+.restaurant-list {
+display: grid;
+grid-template-columns: repeat(5, 1fr);
+gap: 20px;
+margin: 0 auto;
+}
+
+/* Individual restaurant card */
+.restaurant-card {
+padding: 15px;
+border: 1px solid #ccc;
+border-radius: 8px;
+background-color: #f9f9f9;
+transition: transform 0.3s ease, background-color 0.3s ease;
+text-align: center;
+}
+
+/* Hover effect for the restaurant card */
+.restaurant-card:hover {
+transform: scale(1.05);
+background-color: #e0e0e0; /* Darker background on hover */
+}
+
+/* Style for the restaurant name */
+.restaurant-card h2 {
+font-size: 18px;
+font-weight: bold;
+color: #333;
+margin: 10px 0;
+text-transform: capitalize;
+font-family: 'Arial', sans-serif;
+}
+
+/* Style for the city and address */
+.restaurant-card p {
+color: #666;
+font-size: 14px;
+margin: 5px 0;
+font-family: 'Verdana', sans-serif;
+}
+
+/* Remove underline from anchor tag */
+.restaurant-card a {
+text-decoration: none; /* Removes underline */
+color: #333; /* Set color to match the restaurant name */
+font-weight: bold; /* Add bold style for emphasis */
+}
+
+/* Make the grid responsive for smaller screens */
+@media (max-width: 1200px) {
+.restaurant-list {
+  grid-template-columns: repeat(4, 1fr); /* 4 columns on medium screens */
+}
+}
+
+@media (max-width: 900px) {
+.restaurant-list {
+  grid-template-columns: repeat(3, 1fr); /* 3 columns on small screens */
+}
+}
+
+@media (max-width: 600px) {
+.restaurant-list {
+  grid-template-columns: repeat(2, 1fr); /* 2 columns on very small screens */
+}
+}
+
+@media (max-width: 400px) {
+.restaurant-list {
+  grid-template-columns: 1fr; /* 1 column on extra small screens */
+}
+}

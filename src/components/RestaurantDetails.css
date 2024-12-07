@@ -1,0 +1,55 @@
+/* Center the details container in the middle of the page */
+.restaurant-details-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Full screen height */
+    background-color: #f4f4f4; /* Light background for the page */
+  }
+  
+  /* Restaurant details card styling */
+  .restaurant-details-card {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 80%;
+    max-width: 600px;
+    text-align: left;
+    box-sizing: border-box;
+  }
+  
+  /* Title styling */
+  .restaurant-details-card h1 {
+    font-size: 28px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 20px;
+    font-family: 'Arial', sans-serif;
+    text-transform: capitalize;
+    text-align: center;
+  }
+  
+  /* Paragraphs for the details */
+  .restaurant-details-card p {
+    font-size: 16px;
+    color: #555;
+    margin: 12px 0;
+    line-height: 1.5;
+    font-family: 'Verdana', sans-serif;
+  }
+  
+  /* Highlight labels */
+  .restaurant-details-card strong {
+    color: #333;
+    font-weight: bold;
+  }
+  
+  /* Responsive styles for smaller screens */
+  @media (max-width: 600px) {
+    .restaurant-details-card {
+      padding: 20px;
+      width: 90%;
+    }
+  }
+  
