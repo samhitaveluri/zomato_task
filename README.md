@@ -5,7 +5,9 @@ The page intially displays list of restaurants and when clicked on, gives indivi
 <br>
 <h3>Tech stack used : react, node, mongodb </h3>
 <h3>Output images:</h3>
-![image](https://github.com/samhitaveluri/zomato_task/blob/main/images/imagesearch.png)
+![image](https://github.com/samhitaveluri/zomato_task/raw/main/images/imagesearch.png)
+<br>
+![image](https://github.com/samhitaveluri/zomato_task/raw/main/images/latlong.png)
 
 
 
