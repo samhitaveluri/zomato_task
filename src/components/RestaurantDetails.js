@@ -1,19 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import './RestaurantDetails.css';  // Import the CSS file
+import './RestaurantDetails.css';   
 
 const RestaurantDetails = () => {
-  const { id } = useParams();  // Get the restaurant ID from the URL params
+  const { id } = useParams();   
   const [restaurant, setRestaurant] = useState(null);
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/restaurant/${id}`)  // API to fetch restaurant by ID
+    fetch(`http://localhost:5000/api/restaurant/${id}`)   
       .then(response => response.json())
       .then(data => setRestaurant(data))
       .catch(error => {
         console.error('Error fetching data:', error);
       });
-  }, [id]);  // Re-run effect when the restaurant ID changes
+  }, [id]);  
 
   if (!restaurant) {
     return <div>Loading...</div>;
