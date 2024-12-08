@@ -8,6 +8,9 @@ The page intially displays list of restaurants and when clicked on, gives indivi
 ![image](https://github.com/samhitaveluri/zomato_task/raw/main/images/imagesearch.png)
 <br>
 ![image](https://github.com/samhitaveluri/zomato_task/raw/main/images/latlong.png)
-
+<br>
+![image](https://github.com/samhitaveluri/zomato_task/raw/main/images/individualpage.png)
+<br>
+![image](https://github.com/samhitaveluri/zomato_task/raw/main/images/searchoption.png)
 
 
