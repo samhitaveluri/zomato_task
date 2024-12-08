@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import './RestaurantList.css';
+import SearchByName from './SearchByName';
+import './Restaurant.css';
 
 const RestaurantList = () => {
   const [restaurants, setRestaurants] = useState([]);
@@ -129,6 +130,7 @@ const RestaurantList = () => {
         />
         <button onClick={handleSearch}>Search</button>
       </div> 
+      <SearchByName onSearchResults={(data) => setRestaurants(data)} />
       {restaurants.length > 0 ? (
         <div className="restaurant-list">
           {restaurants.map((restaurant) => {
