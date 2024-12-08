@@ -9,6 +9,8 @@ const RestaurantList = () => {
   const [lat, setLat] = useState('');
   const [lon, setLon] = useState('');
   const [radius, setRadius] = useState(''); 
+  const [image, setImage] = useState(null);
+  const [Cuisine, setCuisine] = useState('');
   useEffect(() => {
     fetch('http://localhost:5000/api/restaurants')
       .then(response => {
@@ -61,10 +63,51 @@ const RestaurantList = () => {
   if (error) {
     return <p>Error: {error}</p>;
   }
-
+  const handleImageUpload = async (event) => {
+        const file = event.target.files[0];
+        setImage(file);
+    
+        const formData = new FormData();
+        formData.append('image', file);
+    
+        try {
+          setLoading(true);
+          const response = await fetch('http://localhost:5000/api/upload-image', {
+            method: 'POST',
+            body: formData,
+          });
+    
+          const data = await response.json();
+          setCuisine(data.Cuisine);
+          fetchRestaurantsByCuisine(data.Cuisine);
+        } catch (error) {
+          setError('Error detecting Cuisine.');
+        } finally {
+          setLoading(false);
+        }
+      };
+    
+      const fetchRestaurantsByCuisine = async (Cuisine) => {
+        try {
+          const response = await fetch(`http://localhost:5000/api/restaurants-by-Cuisine?Cuisine=${Cuisine}`);
+          const data = await response.json();
+          setRestaurants(data);
+        } catch (error) {
+          setError('Error fetching restaurants.');
+        }
+      };
   return (
     <div className="restaurant-list-container">
-      <h1>Restaurant List</h1> 
+      {/* <h1>Restaurant List</h1>  */}
+      <div className="upload-container">
+        <input
+          type="file"
+          id="fileInput"
+          onChange={handleImageUpload}
+        />
+        <label htmlFor="fileInput">Upload an Image</label>
+        {Cuisine && <p>Detected Cuisine: {Cuisine}</p>}
+        </div>
       <div className="search-container">
         <input
           type="number"
@@ -84,7 +127,7 @@ const RestaurantList = () => {
           value={radius}
           onChange={(e) => setRadius(e.target.value)}
         />
-        <button onClick={handleSearch}>Search Nearby Restaurants</button>
+        <button onClick={handleSearch}>Search</button>
       </div> 
       {restaurants.length > 0 ? (
         <div className="restaurant-list">
