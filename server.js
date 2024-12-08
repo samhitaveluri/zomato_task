@@ -55,7 +55,23 @@ const haversineDistance = (lat1, lon1, lat2, lon2) => {
   const distance = R * c;  
   return distance;
 };
-//restaurant list
+app.get('/api/restaurants/search', async (req, res) => {
+    const { name } = req.query;  
+    if (!name) {
+      return res.status(400).json({ error: 'Name query parameter is required' });
+    } 
+    try { 
+      const restaurants = await Restaurant.find({
+        'Restaurant Name': { $regex: name, $options: 'i' },  
+      });
+  
+      res.json(restaurants); 
+    } catch (error) {
+      console.error('Error searching restaurants by name:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+  
 app.get('/api/restaurants', async (req, res) => {
   console.log("GET /api/restaurants request received");
   try {
@@ -67,7 +83,7 @@ app.get('/api/restaurants', async (req, res) => {
     res.status(500).send('Server error');
   }
 });
-//restaurant individual
+ 
 app.get('/api/restaurant/:id', async (req, res) => {
   try {
     const restaurant = await Restaurant.findById(req.params.id);
@@ -79,7 +95,7 @@ app.get('/api/restaurant/:id', async (req, res) => {
     res.status(500).send('Server error');
   }
 }); 
-//lat long based
+
 app.get('/api/nearby-restaurants', async (req, res) => {
   const { Latitude, Longitude, radius } = req.query;
   if (!Latitude || !Longitude || !radius) {
@@ -103,7 +119,7 @@ app.get('/api/nearby-restaurants', async (req, res) => {
     res.status(500).send('Server error');
   }
 });
-//detecting cuisine
+
 app.post('/api/upload-image', upload.single('image'), async (req, res) => {
     console.log('Uploaded file:', req.file);
     if (!req.file) {
@@ -131,7 +147,7 @@ app.post('/api/upload-image', upload.single('image'), async (req, res) => {
     return res.status(500).send('Error detecting Cuisine');
     }
 });
-//fetching restaurants by cuisine     
+     
 app.get('/api/restaurants-by-Cuisine', async (req, res) => {
     const { Cuisine } = req.query;
     if (!Cuisine) {
