@@ -55,6 +55,7 @@ const haversineDistance = (lat1, lon1, lat2, lon2) => {
   const distance = R * c;  
   return distance;
 };
+//search based on name
 app.get('/api/restaurants/search', async (req, res) => {
     const { name } = req.query;  
     if (!name) {
@@ -71,7 +72,7 @@ app.get('/api/restaurants/search', async (req, res) => {
       res.status(500).json({ error: 'Internal server error' });
     }
   });
-  
+//restaurant list
 app.get('/api/restaurants', async (req, res) => {
   console.log("GET /api/restaurants request received");
   try {
@@ -83,7 +84,7 @@ app.get('/api/restaurants', async (req, res) => {
     res.status(500).send('Server error');
   }
 });
- 
+//each restaurant by id
 app.get('/api/restaurant/:id', async (req, res) => {
   try {
     const restaurant = await Restaurant.findById(req.params.id);
@@ -95,7 +96,7 @@ app.get('/api/restaurant/:id', async (req, res) => {
     res.status(500).send('Server error');
   }
 }); 
-
+//latitude longitude based fetching
 app.get('/api/nearby-restaurants', async (req, res) => {
   const { Latitude, Longitude, radius } = req.query;
   if (!Latitude || !Longitude || !radius) {
@@ -104,13 +105,13 @@ app.get('/api/nearby-restaurants', async (req, res) => {
   const lat = parseFloat(Latitude);
   const lon = parseFloat(Longitude);
   const rad = parseFloat(radius);
-  console.log('Latitude:', lat, 'Longitude:', lon, 'Radius:', rad);  // Log incoming query parameters
+  console.log('Latitude:', lat, 'Longitude:', lon, 'Radius:', rad); 
   try {
     const allRestaurants = await Restaurant.find();
     const nearbyRestaurants = allRestaurants.filter((restaurant) => {
-      if (!restaurant.Latitude || !restaurant.Longitude) return false; // Skip restaurants without coordinates
+      if (!restaurant.Latitude || !restaurant.Longitude) return false;
       const distance = haversineDistance(lat, lon, restaurant.Latitude, restaurant.Longitude);
-      console.log(`Distance to ${restaurant['Restaurant Name']}: ${distance} km`);  // Log distances
+      console.log(`Distance to ${restaurant['Restaurant Name']}: ${distance} km`);  
       return distance <= rad;
     });
     res.json(nearbyRestaurants);
@@ -119,7 +120,7 @@ app.get('/api/nearby-restaurants', async (req, res) => {
     res.status(500).send('Server error');
   }
 });
-
+//Recognising uploaded image
 app.post('/api/upload-image', upload.single('image'), async (req, res) => {
     console.log('Uploaded file:', req.file);
     if (!req.file) {
@@ -133,7 +134,7 @@ app.post('/api/upload-image', upload.single('image'), async (req, res) => {
     const CuisinesDetected = labels
     .map(label => label.description.toLowerCase()) 
     .filter(label => 
-        ['french', 'japanese', 'desserts', 'italian', 'seafood', 'filipino', 'ice cream', 'dessert', 'pizza', 'biryani', 'sushi', 'korean', 'seafood']
+        ['french', 'japanese', 'desserts', 'italian', 'seafood', 'filipino', 'ice cream', 'dessert', 'pizza', 'biryani', 'sushi', 'korean', 'seafood', 'indian', 'cheese','bakery', 'cafe', 'bar food']
         .includes(label)  
     );
     fs.unlinkSync(imagePath);  
@@ -147,7 +148,7 @@ app.post('/api/upload-image', upload.single('image'), async (req, res) => {
     return res.status(500).send('Error detecting Cuisine');
     }
 });
-     
+//Fetching restaurants based on cuisine detected   
 app.get('/api/restaurants-by-Cuisine', async (req, res) => {
     const { Cuisine } = req.query;
     if (!Cuisine) {
