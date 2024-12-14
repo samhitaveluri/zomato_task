@@ -24,6 +24,7 @@ Added features:
 <br>
 ![image](https://github.com/samhitaveluri/zomato_task/raw/main/images/latlonsearch.jpg)
 <br>
-![image](https://github.com/samhitaveluri/zomato_task/raw/main/images/nearby-cuisine.png)
+![image](https://github.com/samhitaveluri/zomato_task/main/images/nearby-cuisine.png)
+
 
 
