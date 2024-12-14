@@ -50,34 +50,34 @@ const searchSchema = new mongoose.Schema({
   
 const Search = mongoose.model('Search', searchSchema); 
 app.get('/api/top-searches', async (req, res) => {
-const { lat, lon, radius } = req.query; 
-if (lat && lon && radius) {
-    const locationKey = `${lat},${lon}`; 
-    try {
-    const allRestaurants = await Restaurant.find();
-    const nearbyRestaurants = allRestaurants.filter((restaurant) => {
-        if (!restaurant.Latitude || !restaurant.Longitude) return false;
-        const distance = haversineDistance(lat, lon, restaurant.Latitude, restaurant.Longitude);
-        return distance <= parseFloat(radius);
-    });
-    const nearbySearches = {};
-    for (const restaurant of nearbyRestaurants) { 
-        nearbySearches[restaurant['Restaurant Name']] = (nearbySearches[restaurant['Restaurant Name']] || 0) + 1;
-    } 
-    const sortedNearbySearches = Object.keys(nearbySearches).sort(
-        (a, b) => nearbySearches[b] - nearbySearches[a]
-    );
+    const { lat, lon, radius } = req.query; 
+    if (lat && lon && radius) {
+        const locationKey = `${lat},${lon}`; 
+        try {
+        const allRestaurants = await Restaurant.find();
+        const nearbyRestaurants = allRestaurants.filter((restaurant) => {
+            if (!restaurant.Latitude || !restaurant.Longitude) return false;
+            const distance = haversineDistance(lat, lon, restaurant.Latitude, restaurant.Longitude);
+            return distance <= parseFloat(radius);
+        });
+        const nearbySearches = {};
+        for (const restaurant of nearbyRestaurants) { 
+            nearbySearches[restaurant['Restaurant Name']] = (nearbySearches[restaurant['Restaurant Name']] || 0) + 1;
+        } 
+        const sortedNearbySearches = Object.keys(nearbySearches).sort(
+            (a, b) => nearbySearches[b] - nearbySearches[a]
+        );
 
-    return res.json(sortedNearbySearches);
-    } catch (error) {
-    console.error('Error fetching nearby searches:', error);
-    return res.status(500).send('Server error while fetching nearby searches');
-    }
-} 
-const sortedGlobalSearches = Object.keys(topSearchesGlobal).sort(
-    (a, b) => topSearchesGlobal[b] - topSearchesGlobal[a]
-);
-res.json(sortedGlobalSearches);
+        return res.json(sortedNearbySearches);
+        } catch (error) {
+        console.error('Error fetching nearby searches:', error);
+        return res.status(500).send('Server error while fetching nearby searches');
+        }
+    } 
+    const sortedGlobalSearches = Object.keys(topSearchesGlobal).sort(
+        (a, b) => topSearchesGlobal[b] - topSearchesGlobal[a]
+    );
+    res.json(sortedGlobalSearches);
 }); 
 app.post('/api/update-search', (req, res) => {
 const { query, lat, lon } = req.body; 
@@ -151,28 +151,36 @@ app.get('/api/restaurant/:id', async (req, res) => {
 }); 
 //latitude longitude based fetching
 app.get('/api/nearby-restaurants', async (req, res) => {
-  const { Latitude, Longitude, radius } = req.query;
-  if (!Latitude || !Longitude || !radius) {
-    return res.status(400).send('Missing required parameters');
-  }
-  const lat = parseFloat(Latitude);
-  const lon = parseFloat(Longitude);
-  const rad = parseFloat(radius);
-  console.log('Latitude:', lat, 'Longitude:', lon, 'Radius:', rad); 
-  try {
-    const allRestaurants = await Restaurant.find();
-    const nearbyRestaurants = allRestaurants.filter((restaurant) => {
-      if (!restaurant.Latitude || !restaurant.Longitude) return false;
-      const distance = haversineDistance(lat, lon, restaurant.Latitude, restaurant.Longitude);
-      console.log(`Distance to ${restaurant['Restaurant Name']}: ${distance} km`);  
-      return distance <= rad;
-    });
-    res.json(nearbyRestaurants);
-  } catch (error) {
-    console.error('Error fetching nearby restaurants:', error);
-    res.status(500).send('Server error');
-  }
-});
+    const { Latitude, Longitude, radius, Cuisine } = req.query;
+    if (!Latitude || !Longitude || !radius) {
+      return res.status(400).send('Missing required parameters');
+    }
+    const lat = parseFloat(Latitude);
+    const lon = parseFloat(Longitude);
+    const rad = parseFloat(radius);
+  
+    console.log('Latitude:', lat, 'Longitude:', lon, 'Radius:', rad, 'Cuisine:', Cuisine);
+  
+    try {
+      const allRestaurants = await Restaurant.find();
+      const nearbyRestaurants = allRestaurants.filter((restaurant) => {
+        if (!restaurant.Latitude || !restaurant.Longitude) return false;
+        const distance = haversineDistance(lat, lon, restaurant.Latitude, restaurant.Longitude);
+        return distance <= rad;
+      });
+  
+      if (Cuisine) {
+        const filteredRestaurants = nearbyRestaurants.filter((restaurant) => {
+          return restaurant.cuisines.toLowerCase().includes(Cuisine.toLowerCase());
+        });
+        return res.json(filteredRestaurants);
+      }
+      res.json(nearbyRestaurants);
+    } catch (error) {
+      console.error('Error fetching nearby restaurants:', error);
+      res.status(500).send('Server error');
+    }
+  });
 //Recognising uploaded image
 app.post('/api/upload-image', upload.single('image'), async (req, res) => {
     console.log('Uploaded file:', req.file);
@@ -203,18 +211,38 @@ app.post('/api/upload-image', upload.single('image'), async (req, res) => {
 });
 //Fetching restaurants based on cuisine detected   
 app.get('/api/restaurants-by-Cuisine', async (req, res) => {
-    const { Cuisine } = req.query;
+    const { Cuisine, Latitude, Longitude, radius } = req.query;
     if (!Cuisine) {
         return res.status(400).send('Cuisine is required');
     }
     try {
-    const restaurants = await Restaurant.find({
-        Cuisines: { $regex: Cuisine, $options: 'i' },
-    });
-    res.json(restaurants);
+        const cuisineQuery = {
+            Cuisines: { $regex: Cuisine, $options: 'i' },
+        };
+        let restaurants;
+        // If location parameters are provided, filter by proximity
+        if (Latitude && Longitude && radius) {
+            const lat = parseFloat(Latitude);
+            const lon = parseFloat(Longitude);
+            const rad = parseFloat(radius);
+            const allRestaurants = await Restaurant.find(cuisineQuery);
+            restaurants = allRestaurants.filter((restaurant) => {
+                if (!restaurant.Latitude || !restaurant.Longitude) return false;
+                const distance = haversineDistance(
+                    lat,
+                    lon,
+                    restaurant.Latitude,
+                    restaurant.Longitude
+                );
+                return distance <= rad;
+            });
+        } else { 
+            restaurants = await Restaurant.find(cuisineQuery);
+        }
+        res.json(restaurants);
     } catch (error) {
-    console.error('Error fetching restaurants:', error);
-    res.status(500).send('Error fetching restaurants');
+        console.error('Error fetching restaurants:', error);
+        res.status(500).send('Error fetching restaurants');
     }
 }); 
  
