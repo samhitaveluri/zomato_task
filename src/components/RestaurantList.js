@@ -1,3 +1,4 @@
+// Frontend Component
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import SearchByName from './SearchByName';
@@ -9,10 +10,11 @@ const RestaurantList = () => {
   const [error, setError] = useState(null);
   const [lat, setLat] = useState('');
   const [lon, setLon] = useState('');
-  const [radius, setRadius] = useState(''); 
+  const [radius, setRadius] = useState('');
   const [image, setImage] = useState(null);
   const [Cuisine, setCuisine] = useState('');
   const [nearbyRestaurants, setNearbyRestaurants] = useState(null);
+
   useEffect(() => {
     fetch('http://localhost:5000/api/restaurants')
       .then(response => {
@@ -31,26 +33,21 @@ const RestaurantList = () => {
         setError(error.message);
         setLoading(false);
       });
-  }, []);
-
-  // Function to handle nearby restaurant search
+  }, []); 
   const handleSearch = async () => {
     if (!lat || !lon || !radius) {
       alert('Please enter latitude, longitude, and radius.');
       return;
     }
-
     console.log(`Searching for restaurants within ${radius} km of (${lat}, ${lon})`);
-
     setLoading(true);
-
     try {
       const response = await fetch(`http://localhost:5000/api/nearby-restaurants?Latitude=${lat}&Longitude=${lon}&radius=${radius}`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      setNearbyRestaurants(data);  
+      setNearbyRestaurants(data);
       setRestaurants(data);
     } catch (error) {
       console.error('Error fetching nearby restaurants:', error);
@@ -59,6 +56,56 @@ const RestaurantList = () => {
     setLoading(false);
   };
 
+  const handleImageUpload = async (event) => {
+    const file = event.target.files[0];
+    setImage(file);
+    const formData = new FormData();
+    formData.append('image', file);
+    try {
+        setLoading(true); 
+        const response = await fetch('http://localhost:5000/api/upload-image', {
+            method: 'POST',
+            body: formData,
+        }); 
+        const data = await response.json();
+        setCuisine(data.Cuisine); 
+        if (lat && lon && radius) { 
+            const nearbyResponse = await fetch(
+                `http://localhost:5000/api/restaurants-by-Cuisine?Cuisine=${data.Cuisine}&Latitude=${lat}&Longitude=${lon}&radius=${radius}`
+            );
+            const nearbyData = await nearbyResponse.json();
+            setRestaurants(nearbyData);
+        } else { 
+            fetchRestaurantsByCuisine(data.Cuisine);
+        }
+    } catch (error) {
+        console.error('Error detecting Cuisine or fetching restaurants:', error);
+        setError('Error detecting Cuisine or fetching restaurants');
+    } finally {
+        setLoading(false);
+    }
+  };
+
+  const fetchRestaurantsByCuisine = async (Cuisine) => {
+    try {
+        const response = await fetch(`http://localhost:5000/api/restaurants-by-Cuisine?Cuisine=${Cuisine}`);
+        const data = await response.json();
+        setRestaurants(data);
+    } catch (error) {
+        setError('Error fetching restaurants.');
+    }
+  };
+
+//   const fetchNearbyRestaurantsByCuisine = async (Cuisine, lat, lon, radius) => {
+//     try {
+//       const response = await fetch(`http://localhost:5000/api/nearby-restaurants?Latitude=${lat}&Longitude=${lon}&radius=${radius}&Cuisine=${Cuisine}`);
+//       const data = await response.json();
+//       setRestaurants(data);
+//     } catch (error) {
+//       setError('Error fetching nearby restaurants with cuisine.');
+//     }
+//   };
+
   if (loading) {
     return <p>Loading...</p>;
   }
@@ -66,42 +113,9 @@ const RestaurantList = () => {
   if (error) {
     return <p>Error: {error}</p>;
   }
-  const handleImageUpload = async (event) => {
-        const file = event.target.files[0];
-        setImage(file);
-    
-        const formData = new FormData();
-        formData.append('image', file);
-    
-        try {
-          setLoading(true);
-          const response = await fetch('http://localhost:5000/api/upload-image', {
-            method: 'POST',
-            body: formData,
-          });
-    
-          const data = await response.json();
-          setCuisine(data.Cuisine);
-          fetchRestaurantsByCuisine(data.Cuisine);
-        } catch (error) {
-          setError('Error detecting Cuisine.');
-        } finally {
-          setLoading(false);
-        }
-      };
-    
-      const fetchRestaurantsByCuisine = async (Cuisine) => {
-        try {
-          const response = await fetch(`http://localhost:5000/api/restaurants-by-Cuisine?Cuisine=${Cuisine}`);
-          const data = await response.json();
-          setRestaurants(data);
-        } catch (error) {
-          setError('Error fetching restaurants.');
-        }
-      };
+
   return (
     <div className="restaurant-list-container">
-      {/* <h1>Restaurant List</h1>  */}
       <div className="upload-container">
         <input
           type="file"
@@ -110,7 +124,7 @@ const RestaurantList = () => {
         />
         <label htmlFor="fileInput">Upload an Image</label>
         {Cuisine && <p>Detected Cuisine: {Cuisine}</p>}
-        </div>
+      </div>
       <div className="search-container">
         <input
           type="number"
@@ -131,7 +145,7 @@ const RestaurantList = () => {
           onChange={(e) => setRadius(e.target.value)}
         />
         <button onClick={handleSearch}>Search</button>
-      </div> 
+      </div>
       <SearchByName
         onSearchResults={(data) => setRestaurants(data)}
         nearbyRestaurants={nearbyRestaurants}
