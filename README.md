@@ -12,5 +12,9 @@ The page intially displays list of restaurants and when clicked on, gives indivi
 ![image](https://github.com/samhitaveluri/zomato_task/raw/main/images/individualpage.png)
 <br>
 ![image](https://github.com/samhitaveluri/zomato_task/raw/main/images/searchoption.png)
+<br>
+![image](https://github.com/samhitaveluri/zomato_task/raw/main/images/globalsearch.png)
+<br>
+![image](https://github.com/samhitaveluri/zomato_task/raw/main/images/latlonsearch.jpg)
 
 
