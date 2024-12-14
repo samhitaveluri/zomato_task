@@ -12,6 +12,7 @@ const RestaurantList = () => {
   const [radius, setRadius] = useState(''); 
   const [image, setImage] = useState(null);
   const [Cuisine, setCuisine] = useState('');
+  const [nearbyRestaurants, setNearbyRestaurants] = useState(null);
   useEffect(() => {
     fetch('http://localhost:5000/api/restaurants')
       .then(response => {
@@ -49,6 +50,7 @@ const RestaurantList = () => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
+      setNearbyRestaurants(data);  
       setRestaurants(data);
     } catch (error) {
       console.error('Error fetching nearby restaurants:', error);
@@ -130,7 +132,11 @@ const RestaurantList = () => {
         />
         <button onClick={handleSearch}>Search</button>
       </div> 
-      <SearchByName onSearchResults={(data) => setRestaurants(data)} />
+      <SearchByName
+        onSearchResults={(data) => setRestaurants(data)}
+        nearbyRestaurants={nearbyRestaurants}
+        hasLatLon={lat && lon} // Check if latitude and longitude are provided
+      />
       {restaurants.length > 0 ? (
         <div className="restaurant-list">
           {restaurants.map((restaurant) => {
