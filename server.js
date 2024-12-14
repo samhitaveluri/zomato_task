@@ -4,6 +4,8 @@ const mongoose = require('mongoose');
 const multer = require('multer');
 const vision = require('@google-cloud/vision');
 const fs = require('fs');
+const topSearchesGlobal = {};  
+const topSearchesByLocation = {};
 require('dotenv').config(); 
 const app = express();
 const port = 5000; 
@@ -41,7 +43,58 @@ const restaurantSchema = new mongoose.Schema({
   ratingText: { type: String },
   votes: { type: Number }
 });
+const searchSchema = new mongoose.Schema({
+    query: { type: String, required: true },
+    count: { type: Number, default: 1 },
+});
+  
+const Search = mongoose.model('Search', searchSchema); 
+app.get('/api/top-searches', async (req, res) => {
+const { lat, lon, radius } = req.query; 
+if (lat && lon && radius) {
+    const locationKey = `${lat},${lon}`; 
+    try {
+    const allRestaurants = await Restaurant.find();
+    const nearbyRestaurants = allRestaurants.filter((restaurant) => {
+        if (!restaurant.Latitude || !restaurant.Longitude) return false;
+        const distance = haversineDistance(lat, lon, restaurant.Latitude, restaurant.Longitude);
+        return distance <= parseFloat(radius);
+    });
+    const nearbySearches = {};
+    for (const restaurant of nearbyRestaurants) { 
+        nearbySearches[restaurant['Restaurant Name']] = (nearbySearches[restaurant['Restaurant Name']] || 0) + 1;
+    } 
+    const sortedNearbySearches = Object.keys(nearbySearches).sort(
+        (a, b) => nearbySearches[b] - nearbySearches[a]
+    );
 
+    return res.json(sortedNearbySearches);
+    } catch (error) {
+    console.error('Error fetching nearby searches:', error);
+    return res.status(500).send('Server error while fetching nearby searches');
+    }
+} 
+const sortedGlobalSearches = Object.keys(topSearchesGlobal).sort(
+    (a, b) => topSearchesGlobal[b] - topSearchesGlobal[a]
+);
+res.json(sortedGlobalSearches);
+}); 
+app.post('/api/update-search', (req, res) => {
+const { query, lat, lon } = req.body; 
+if (!query) {
+    return res.status(400).json({ error: 'Search query is required' });
+} 
+topSearchesGlobal[query] = (topSearchesGlobal[query] || 0) + 1; 
+if (lat && lon) {
+    const locationKey = `${lat},${lon}`;
+    if (!topSearchesByLocation[locationKey]) {
+    topSearchesByLocation[locationKey] = {};
+    }
+    topSearchesByLocation[locationKey][query] =
+    (topSearchesByLocation[locationKey][query] || 0) + 1;
+} 
+res.json({ success: true });
+});
 const Restaurant = mongoose.model('zomato_restaurants', restaurantSchema); 
 const haversineDistance = (lat1, lon1, lat2, lon2) => {
   const R = 6371;  
