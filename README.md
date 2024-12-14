@@ -7,6 +7,7 @@ Added features:
 <ul>
 <li>To display top keywords(globally/based on nearby radius).</li>
 <li>To display further restaurants list based on search feature after searching near by restaurants.</li>
+ <li>To display nearby restaurants based on cuisine detected from image upload.</li>
 </ul>
  
 <h3>Tech stack used : react, node, mongodb </h3>
